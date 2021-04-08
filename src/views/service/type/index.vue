@@ -42,7 +42,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:type:add']"
+          v-hasPermi="['server:type:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -53,7 +53,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:type:edit']"
+          v-hasPermi="['server:type:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -64,7 +64,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:type:remove']"
+          v-hasPermi="['server:type:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -74,7 +74,7 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['system:type:export']"
+          v-hasPermi="['server:type:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -97,19 +97,19 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:type:edit']"
+            v-hasPermi="['server:type:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['system:type:remove']"
+            v-hasPermi="['server:type:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -144,6 +144,49 @@
         <el-form-item label="备注" prop="remarks">
           <el-input v-model="form.remarks" placeholder="请输入备注" />
         </el-form-item>
+        <el-divider content-position="center">选题管理信息</el-divider>
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddProject">添加</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDeleteProject">删除</el-button>
+          </el-col>
+        </el-row>
+        <el-table :data="projectList" :row-class-name="rowProjectIndex" @selection-change="handleProjectSelectionChange" ref="project">
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column label="序号" align="center" prop="index" width="50"/>
+          <el-table-column label="选题名称" prop="projectName">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.projectName" placeholder="请输入选题名称" />
+            </template>
+          </el-table-column>
+          <el-table-column label="选题简介" prop="projectDetail">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.projectDetail" placeholder="请输入选题简介" />
+            </template>
+          </el-table-column>
+          <el-table-column label="涉及技术" prop="projectTech">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.projectTech" placeholder="请输入涉及技术" />
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" prop="createDate">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.createDate" placeholder="请输入创建时间" />
+            </template>
+          </el-table-column>
+          <el-table-column label="选题状态" prop="state">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.state" placeholder="请输入选题状态" />
+            </template>
+          </el-table-column>
+          <el-table-column label="备注" prop="remarks">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.remarks" placeholder="请输入备注" />
+            </template>
+          </el-table-column>
+        </el-table>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -154,7 +197,7 @@
 </template>
 
 <script>
-import { listType, getType, delType, addType, updateType, exportType } from "@/api/system/type";
+import { listType, getType, delType, addType, updateType, exportType } from "@/api/service/type";
 
 export default {
   name: "Type",
@@ -166,6 +209,8 @@ export default {
       loading: true,
       // 选中数组
       ids: [],
+      // 子表选中数据
+      checkedProject: [],
       // 非单个禁用
       single: true,
       // 非多个禁用
@@ -176,6 +221,8 @@ export default {
       total: 0,
       // 选题类别管理表格数据
       typeList: [],
+      // 选题管理表格数据
+      projectList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -240,6 +287,7 @@ export default {
         state: 0,
         remarks: null
       };
+      this.projectList = [];
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -270,6 +318,7 @@ export default {
       const projectTypeId = row.projectTypeId || this.ids
       getType(projectTypeId).then(response => {
         this.form = response.data;
+        this.projectList = response.data.projectList;
         this.open = true;
         this.title = "修改选题类别管理";
       });
@@ -278,6 +327,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.form.projectList = this.projectList;
           if (this.form.projectTypeId != null) {
             updateType(this.form).then(response => {
               this.msgSuccess("修改成功");
@@ -307,6 +357,38 @@ export default {
           this.getList();
           this.msgSuccess("删除成功");
         })
+    },
+	/** 选题管理序号 */
+    rowProjectIndex({ row, rowIndex }) {
+      row.index = rowIndex + 1;
+    },
+    /** 选题管理添加按钮操作 */
+    handleAddProject() {
+      let obj = {};
+      obj.projectName = "";
+      obj.projectDetail = "";
+      obj.projectTech = "";
+      obj.createDate = "";
+      obj.state = "";
+      obj.remarks = "";
+      this.projectList.push(obj);
+    },
+    /** 选题管理删除按钮操作 */
+    handleDeleteProject() {
+      if (this.checkedProject.length == 0) {
+        this.$alert("请先选择要删除的选题管理数据", "提示", { confirmButtonText: "确定", });
+      } else {
+        this.projectList.splice(this.checkedProject[0].index - 1, 1);
+      }
+    },
+    /** 单选框选中数据 */
+    handleProjectSelectionChange(selection) {
+      if (selection.length > 1) {
+        this.$refs.project.clearSelection();
+        this.$refs.project.toggleRowSelection(selection.pop());
+      } else {
+        this.checkedProject = selection;
+      }
     },
     /** 导出按钮操作 */
     handleExport() {
