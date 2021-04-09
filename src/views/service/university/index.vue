@@ -20,13 +20,14 @@
         />
       </el-form-item>
       <el-form-item label="学校状态" prop="state">
-        <el-input
-          v-model="queryParams.state"
-          placeholder="请输入学校状态"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.state" placeholder="请选择学校状态" clearable size="small">
+          <el-option
+            v-for="dict in stateOptions"
+            :key="dict.dictValue"
+            :label="dict.dictLabel"
+            :value="dict.dictValue"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -107,7 +108,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -128,8 +129,14 @@
         <el-form-item label="学校地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入学校地址" />
         </el-form-item>
-        <el-form-item label="学校状态" prop="state">
-          <el-input v-model="form.state" placeholder="请输入学校状态" />
+        <el-form-item label="学校状态">
+          <el-radio-group v-model="form.state">
+            <el-radio
+              v-for="dict in stateOptions"
+              :key="dict.dictValue"
+              :label="parseInt(dict.dictValue)"
+            >{{dict.dictLabel}}</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remarks">
           <el-input v-model="form.remarks" placeholder="请输入备注" />
@@ -151,9 +158,15 @@
               <el-input v-model="scope.row.collegeName" placeholder="请输入学院名" />
             </template>
           </el-table-column>
-          <el-table-column label="学校状态" prop="state">
+          <el-table-column label="学院状态" prop="state">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.state" placeholder="请输入学校状态" />
+                <el-radio-group v-model="scope.row.state" placeholder="请输入学校状态">
+                  <el-radio
+                    v-for="dict in stateOptions"
+                    :key="dict.dictValue"
+                    :label="parseInt(dict.dictValue)"
+                  >{{dict.dictLabel}}</el-radio>
+                </el-radio-group>
             </template>
           </el-table-column>
           <el-table-column label="备注" prop="remarks">
@@ -198,6 +211,8 @@ export default {
       universityList: [],
       // 学院管理表格数据
       collegeList: [],
+      // 学校状态字典
+      stateOptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -234,6 +249,9 @@ export default {
   },
   created() {
     this.getList();
+    this.getDicts("sys_normal_disable").then(response => {
+      this.stateOptions = response.data;
+    });
   },
   methods: {
     /** 查询学校管理列表 */

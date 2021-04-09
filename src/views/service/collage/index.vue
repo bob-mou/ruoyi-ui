@@ -19,8 +19,8 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="学校状态" prop="state">
-        <el-select v-model="queryParams.state" placeholder="请选择学校状态" clearable size="small">
+      <el-form-item label="学院状态" prop="state">
+        <el-select v-model="queryParams.state" placeholder="请选择学院状态" clearable size="small">
           <el-option
             v-for="dict in stateOptions"
             :key="dict.dictValue"
@@ -107,7 +107,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -125,7 +125,7 @@
         <el-form-item label="外键学校ID" prop="universityId">
           <el-input v-model="form.universityId" placeholder="请输入外键学校ID" />
         </el-form-item>
-        <el-form-item label="学校状态">
+        <el-form-item label="学院状态">
           <el-radio-group v-model="form.state">
             <el-radio
               v-for="dict in stateOptions"
