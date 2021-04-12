@@ -73,10 +73,9 @@
 
     <el-table v-loading="loading" :data="collageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="学院ID" align="center" prop="collegeId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="学院名" align="center" prop="collegeName" />
       <el-table-column label="外键学校ID" align="center" prop="universityId" />
-      <el-table-column label="学校状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">

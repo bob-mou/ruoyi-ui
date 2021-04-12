@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="98px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="学生学号" prop="stuNumber">
         <el-input
           v-model="queryParams.stuNumber"
@@ -10,7 +10,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-
       <el-form-item label="学生姓名" prop="stuName">
         <el-input
           v-model="queryParams.stuName"
@@ -24,6 +23,15 @@
         <el-input
           v-model="queryParams.stuPhone"
           placeholder="请输入学生手机号"
+          clearable
+          size="small"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="学生QQ号" prop="stuQq">
+        <el-input
+          v-model="queryParams.stuQq"
+          placeholder="请输入学生QQ号"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -93,21 +101,22 @@
 
     <el-table v-loading="loading" :data="stuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="自然主键，学生id" align="center" prop="stuId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="学生学号" align="center" prop="stuNumber" />
       <el-table-column label="所属班级ID" align="center" prop="classId" />
       <el-table-column label="所属专业ID" align="center" prop="majorId" />
       <el-table-column label="所属学院ID" align="center" prop="collegeId" />
       <el-table-column label="所属学校ID" align="center" prop="universityId" />
-      <el-table-column label="学校类型" align="center" prop="schoolType" :formatter="schoolTypeFormat" />
-      <el-table-column label="毕设名称" align="center" prop="projectName" />
-      <el-table-column label="毕设描述" align="center" prop="projectDetail" />
       <el-table-column label="学生姓名" align="center" prop="stuName" />
       <el-table-column label="学生手机号" align="center" prop="stuPhone" />
       <el-table-column label="学生QQ号" align="center" prop="stuQq" />
       <el-table-column label="学生邮箱" align="center" prop="stuEmail" />
       <el-table-column label="学历" align="center" prop="stuEducation" />
-      <el-table-column label="学生状态" align="center" prop="state" :formatter="stateFormat" />
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -137,47 +146,23 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改学生管理对话框 -->
+    <!-- 添加或修改学生表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="学生学号" prop="stuNumber">
           <el-input v-model="form.stuNumber" placeholder="请输入学生学号" />
         </el-form-item>
         <el-form-item label="所属班级ID" prop="classId">
-          <el-select v-model="form.classId" placeholder="请选择所属班级ID">
-            <el-option label="请选择字典生成" value="" />
-          </el-select>
+          <el-input v-model="form.classId" placeholder="请输入所属班级ID" />
         </el-form-item>
         <el-form-item label="所属专业ID" prop="majorId">
-          <el-select v-model="form.majorId" placeholder="请选择所属专业ID">
-            <el-option label="请选择字典生成" value="" />
-          </el-select>
+          <el-input v-model="form.majorId" placeholder="请输入所属专业ID" />
         </el-form-item>
         <el-form-item label="所属学院ID" prop="collegeId">
-          <el-select v-model="form.collegeId" placeholder="请选择所属学院ID">
-            <el-option label="请选择字典生成" value="" />
-          </el-select>
+          <el-input v-model="form.collegeId" placeholder="请输入所属学院ID" />
         </el-form-item>
         <el-form-item label="所属学校ID" prop="universityId">
-          <el-select v-model="form.universityId" placeholder="请选择所属学校ID">
-            <el-option label="请选择字典生成" value="" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学校类型" prop="schoolType">
-          <el-select v-model="form.schoolType" placeholder="请选择学校类型">
-            <el-option
-              v-for="dict in schoolTypeOptions"
-              :key="dict.dictValue"
-              :label="dict.dictLabel"
-              :value="dict.dictValue"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="毕设名称" prop="projectName">
-          <el-input v-model="form.projectName" placeholder="请输入毕设名称" />
-        </el-form-item>
-        <el-form-item label="毕设描述" prop="projectDetail">
-          <el-input v-model="form.projectDetail" placeholder="请输入毕设描述" />
+          <el-input v-model="form.universityId" placeholder="请输入所属学校ID" />
         </el-form-item>
         <el-form-item label="学生姓名" prop="stuName">
           <el-input v-model="form.stuName" placeholder="请输入学生姓名" />
@@ -266,14 +251,12 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 学生管理表格数据
+      // 学生表表格数据
       stuList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
-      // 学校类型字典
-      schoolTypeOptions: [],
       // 学生状态字典
       stateOptions: [],
       // 查询参数
@@ -283,6 +266,7 @@ export default {
         stuNumber: null,
         stuName: null,
         stuPhone: null,
+        stuQq: null,
       },
       // 用户导入参数
       upload: {
@@ -306,25 +290,25 @@ export default {
           { required: true, message: "学生学号不能为空", trigger: "blur" }
         ],
         classId: [
-          { required: true, message: "所属班级ID不能为空", trigger: "change" }
+          { required: true, message: "所属班级ID不能为空", trigger: "blur" }
         ],
         majorId: [
-          { required: true, message: "所属专业ID不能为空", trigger: "change" }
+          { required: true, message: "所属专业ID不能为空", trigger: "blur" }
         ],
         collegeId: [
-          { required: true, message: "所属学院ID不能为空", trigger: "change" }
+          { required: true, message: "所属学院ID不能为空", trigger: "blur" }
         ],
         universityId: [
-          { required: true, message: "所属学校ID不能为空", trigger: "change" }
-        ],
-        schoolType: [
-          { required: true, message: "学校类型不能为空", trigger: "change" }
+          { required: true, message: "所属学校ID不能为空", trigger: "blur" }
         ],
         stuName: [
           { required: true, message: "学生姓名不能为空", trigger: "blur" }
         ],
         stuPhone: [
           { required: true, message: "学生手机号不能为空", trigger: "blur" }
+        ],
+        stuQq: [
+          { required: true, message: "学生QQ号不能为空", trigger: "blur" }
         ],
         stuEducation: [
           { required: true, message: "学历不能为空", trigger: "blur" }
@@ -340,15 +324,12 @@ export default {
   },
   created() {
     this.getList();
-    this.getDicts("school_type").then(response => {
-      this.schoolTypeOptions = response.data;
-    });
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
   },
   methods: {
-    /** 查询学生管理列表 */
+    /** 查询学生表列表 */
     getList() {
       this.loading = true;
       listStu(this.queryParams).then(response => {
@@ -356,10 +337,6 @@ export default {
         this.total = response.total;
         this.loading = false;
       });
-    },
-    // 学校类型字典翻译
-    schoolTypeFormat(row, column) {
-      return this.selectDictLabel(this.schoolTypeOptions, row.schoolType);
     },
     // 学生状态字典翻译
     stateFormat(row, column) {
@@ -379,9 +356,6 @@ export default {
         majorId: null,
         collegeId: null,
         universityId: null,
-        schoolType: null,
-        projectName: null,
-        projectDetail: null,
         stuName: null,
         stuPhone: null,
         stuQq: null,
@@ -413,7 +387,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加学生管理";
+      this.title = "添加学生表";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -422,7 +396,7 @@ export default {
       getStu(stuId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改学生管理";
+        this.title = "修改学生表";
       });
     },
     /** 提交按钮 */
@@ -448,7 +422,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const stuIds = row.stuId || this.ids;
-      this.$confirm('是否确认删除学生管理编号为"' + stuIds + '"的数据项?', "警告", {
+      this.$confirm('是否确认删除学生表编号为"' + stuIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
@@ -462,7 +436,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有学生管理数据项?', "警告", {
+      this.$confirm('是否确认导出所有学生表数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"

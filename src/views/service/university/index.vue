@@ -64,11 +64,16 @@
 
     <el-table v-loading="loading" :data="universityList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="学校ID" align="center" prop="universityId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="学校名" align="center" prop="universityName" />
-      <el-table-column label="学校logo" align="center" prop="logoPath" />
+      <el-table-column label="学校logo" align="center" prop="logoPath" >
+        <template slot-scope="scope">
+          <el-image
+            style="width: 33%; height:33% "
+            :src="scope.row.logoPath"
+          ></el-image>
+        </template></el-table-column>
       <el-table-column label="学校地址" align="center" prop="address" />
-      <el-table-column label="学校状态" align="center" prop="state" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
