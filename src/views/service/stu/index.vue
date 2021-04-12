@@ -101,7 +101,7 @@
 
     <el-table v-loading="loading" :data="stuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="自然主键，学生id" align="center" prop="stuId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="学生学号" align="center" prop="stuNumber" />
       <el-table-column label="所属班级ID" align="center" prop="classId" />
       <el-table-column label="所属专业ID" align="center" prop="majorId" />
@@ -117,7 +117,6 @@
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="学生状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
