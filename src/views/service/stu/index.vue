@@ -19,56 +19,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="所属学校" prop="universityId">
-        <el-select v-model="queryParams.universityId" placeholder="请选择所属学校" clearable size="small" @change="getUniversityValue">
-          <el-option
-            v-for="item in universityoptions"
-            :key="item.universityId"
-            :label="item.universityName"
-            :value="item.universityId">
-          </el-option>
-        </el-select>
-      </el-form-item>
-<!--      <el-form-item label="学校类型" prop="schoolType">-->
-<!--        <el-select v-model="queryParams.schoolType" placeholder="请选择学校类型" clearable size="small">-->
-<!--          <el-option-->
-<!--            v-for="dict in schoolTypeOptions"-->
-<!--            :key="dict.dictValue"-->
-<!--            :label="dict.dictLabel"-->
-<!--            :value="dict.dictValue"-->
-<!--          />-->
-<!--        </el-select>-->
-<!--      </el-form-item>-->
-      <el-form-item label="所属学院" prop="collegeId">
-        <el-select v-model="queryParams.collegeId" placeholder="请选择所属学院" clearable size="small" @change="getCollegeValue">
-          <el-option
-            v-for="item in collegeoptions"
-            :key="item.collegeId"
-            :label="item.collegeName"
-            :value="item.collegeId">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="所属专业" prop="majorId">
-        <el-select v-model="queryParams.majorId" placeholder="请选择所属专业" clearable size="small" @change="getMajorValue">
-          <el-option
-            v-for="item in majoroptions"
-            :key="item.majorId"
-            :label="item.majorName"
-            :value="item.majorId">
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="所属班级" prop="classId">
-        <el-select v-model="queryParams.classId" placeholder="请选择所属班级" clearable size="small">
-          <el-option
-            v-for="item in classoptions"
-            :key="item.classId"
-            :label="item.className"
-            :value="item.classId">
-          </el-option>
-        </el-select>
-      </el-form-item>
       <el-form-item label="学生手机号" prop="stuPhone">
         <el-input
           v-model="queryParams.stuPhone"
@@ -383,11 +333,6 @@ export default {
         pageNum: 1,
         pageSize: 10,
         stuNumber: null,
-        classId: null,
-        majorId: null,
-        collegeId: null,
-        universityId: null,
-        schoolType: null,
         stuName: null,
         stuPhone: null,
         stuEducation: null,
@@ -433,6 +378,9 @@ export default {
         ],
         stuPhone: [
           { required: true, message: "学生手机号不能为空", trigger: "blur" }
+        ],
+        stuQq: [
+          { required: true, message: "学生QQ号不能为空", trigger: "blur" }
         ],
         stuEducation: [
           { required: true, message: "学历不能为空", trigger: "blur" }
@@ -595,7 +543,6 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      console.log(row)
       this.reset();
       const stuId = row.stuId || this.ids
       getStu(stuId).then(response => {

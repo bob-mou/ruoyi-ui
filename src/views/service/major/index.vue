@@ -83,10 +83,9 @@
 
     <el-table v-loading="loading" :data="majorList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="专业id" align="center" prop="majorId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="专业名称" align="center" prop="majorName" />
       <el-table-column label="外键学院ID" align="center" prop="collegeId" />
-      <el-table-column label="专业状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -107,7 +106,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"

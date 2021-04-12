@@ -73,7 +73,7 @@
 
     <el-table v-loading="loading" :data="myclassList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="班级id" align="center" prop="classId" />
+      <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="班级名称" align="center" prop="className" />
       <el-table-column label="外键专业ID" align="center" prop="majorId" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
@@ -81,7 +81,6 @@
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="班级状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
