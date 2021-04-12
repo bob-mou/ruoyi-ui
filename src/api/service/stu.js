@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询学生表列表
+// 查询学生管理列表
 export function listStu(query) {
   return request({
     url: '/service/stu/list',
@@ -9,7 +9,7 @@ export function listStu(query) {
   })
 }
 
-// 查询学生表详细
+// 查询学生管理详细
 export function getStu(stuId) {
   return request({
     url: '/service/stu/' + stuId,
@@ -17,7 +17,7 @@ export function getStu(stuId) {
   })
 }
 
-// 新增学生表
+// 新增学生管理
 export function addStu(data) {
   return request({
     url: '/service/stu',
@@ -26,7 +26,7 @@ export function addStu(data) {
   })
 }
 
-// 修改学生表
+// 修改学生管理
 export function updateStu(data) {
   return request({
     url: '/service/stu',
@@ -35,7 +35,7 @@ export function updateStu(data) {
   })
 }
 
-// 删除学生表
+// 删除学生管理
 export function delStu(stuId) {
   return request({
     url: '/service/stu/' + stuId,
@@ -43,7 +43,7 @@ export function delStu(stuId) {
   })
 }
 
-// 导出学生表
+// 导出学生管理
 export function exportStu(query) {
   return request({
     url: '/service/stu/export',
