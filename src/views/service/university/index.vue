@@ -299,7 +299,6 @@ export default {
         this.collegeList = response.data.collegeList;
         this.open = true;
         this.title = "修改学校管理";
-        console.log(this.collegeList)
       });
     },
     /** 提交按钮 */
@@ -307,8 +306,6 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.form.collegeList = this.collegeList;
-          console.log(this.form.collegeList)
-          console.log(this.form)
           if (this.form.universityId != null) {
             updateUniversity(this.form).then(response => {
               this.msgSuccess("修改成功");
@@ -344,20 +341,31 @@ export default {
       row.index = rowIndex + 1;
     },
     /** 学院管理添加按钮操作 */
-    handleAddCollege: function() {
-      let obj = {}
-      obj.collegeName = ''
-      obj.state = ''
-      obj.remarks = ''
-      this.collegeList.push(obj)
-      console.log(this.collegeList)
+    handleAddCollege() {
+      let obj = {};
+      obj.collegeName = "";
+      obj.state = "";
+      obj.remarks = "";
+      this.collegeList.push(obj);
     },
     /** 学院管理删除按钮操作 */
-    handleDeleteCollege:function() {
+    handleDeleteCollege() {
       if (this.checkedCollege.length == 0) {
         this.$alert("请先选择要删除的学院管理数据", "提示", { confirmButtonText: "确定", });
       } else {
-        this.collegeList.splice(this.checkedCollege[0].index - 1, 1);
+        this.$confirm('此操作将永久删除当前学院下的专业以及专业下的所有数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.collegeList.splice(this.checkedCollege[0].index - 1, 1);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+        // this.collegeList.splice(this.checkedCollege[0].index - 1, 1);
       }
     },
     /** 单选框选中数据 */

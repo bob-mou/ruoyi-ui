@@ -600,6 +600,7 @@ export default {
       this.reset();
       const stuId = row.stuId || this.ids
       getStu(stuId).then(response => {
+        // console.log(response.data)
         this.form = response.data;
         this.open = true;
         this.title = "修改学生管理";
