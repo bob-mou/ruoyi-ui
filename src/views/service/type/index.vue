@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="选题类型名称" prop="projectTypeName">
+      <el-form-item label="类型" prop="projectTypeName">
         <el-input
           v-model="queryParams.projectTypeName"
           placeholder="请输入选题类型名称"
@@ -9,24 +9,6 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createDate">
-        <el-date-picker clearable size="small"
-          v-model="queryParams.createDate"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择创建时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="选题类型状态" prop="state">
-        <el-select v-model="queryParams.state" placeholder="请选择选题类型状态" clearable size="small">
-          <el-option
-            v-for="dict in stateOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
-          />
-        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -82,14 +64,15 @@
 
     <el-table v-loading="loading" :data="typeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="选题类型ID" align="center" prop="projectTypeId" />
-      <el-table-column label="选题类型名称" align="center" prop="projectTypeName" />
+      <el-table-column label="编号" align="center" type="index" />
+      <el-table-column label="类型" align="center" prop="projectTypeName" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="选题类型状态" align="center" prop="state" :formatter="stateFormat" />
+      <el-table-column label="状态" align="center" prop="state" :formatter="stateFormat" />
+      <el-table-column label="备注" align="center" prop="remarks"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -109,7 +92,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -124,15 +107,7 @@
         <el-form-item label="选题类型名称" prop="projectTypeName">
           <el-input v-model="form.projectTypeName" placeholder="请输入选题类型名称" />
         </el-form-item>
-        <el-form-item label="创建时间" prop="createDate">
-          <el-date-picker clearable size="small"
-            v-model="form.createDate"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="选择创建时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="选题类型状态">
+        <el-form-item label="状态">
           <el-radio-group v-model="form.state">
             <el-radio
               v-for="dict in stateOptions"
@@ -171,14 +146,15 @@
               <el-input v-model="scope.row.projectTech" placeholder="请输入涉及技术" />
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createDate">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.createDate" placeholder="请输入创建时间" />
-            </template>
-          </el-table-column>
           <el-table-column label="选题状态" prop="state">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.state" placeholder="请输入选题状态" />
+              <el-radio-group v-model="scope.row.state">
+                <el-radio
+                  v-for="dict in stateOptions"
+                  :key="dict.dictValue"
+                  :label="parseInt(dict.dictValue)"
+                >{{dict.dictLabel}}</el-radio>
+              </el-radio-group>
             </template>
           </el-table-column>
           <el-table-column label="备注" prop="remarks">

@@ -146,7 +146,7 @@
           </el-table-column>
           <el-table-column label="学院状态" prop="state">
             <template slot-scope="scope">
-                <el-radio-group v-model="scope.row.state" placeholder="请输入学校状态">
+                <el-radio-group v-model="scope.row.state" placeholder="请输入学院状态">
                   <el-radio
                     v-for="dict in stateOptions"
                     :key="dict.dictValue"
@@ -299,6 +299,7 @@ export default {
         this.collegeList = response.data.collegeList;
         this.open = true;
         this.title = "修改学校管理";
+        console.log(this.collegeList)
       });
     },
     /** 提交按钮 */
@@ -306,6 +307,8 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.form.collegeList = this.collegeList;
+          console.log(this.form.collegeList)
+          console.log(this.form)
           if (this.form.universityId != null) {
             updateUniversity(this.form).then(response => {
               this.msgSuccess("修改成功");
@@ -341,15 +344,16 @@ export default {
       row.index = rowIndex + 1;
     },
     /** 学院管理添加按钮操作 */
-    handleAddCollege() {
-      let obj = {};
-      obj.collegeName = "";
-      obj.state = "";
-      obj.remarks = "";
-      this.collegeList.push(obj);
+    handleAddCollege: function() {
+      let obj = {}
+      obj.collegeName = ''
+      obj.state = ''
+      obj.remarks = ''
+      this.collegeList.push(obj)
+      console.log(this.collegeList)
     },
     /** 学院管理删除按钮操作 */
-    handleDeleteCollege() {
+    handleDeleteCollege:function() {
       if (this.checkedCollege.length == 0) {
         this.$alert("请先选择要删除的学院管理数据", "提示", { confirmButtonText: "确定", });
       } else {

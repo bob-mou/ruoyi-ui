@@ -1,42 +1,20 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="外键选题类型ID" prop="projectTypeId">
-        <el-select v-model="queryParams.projectTypeId" placeholder="请选择外键选题类型ID" clearable size="small">
-          <el-option label="请选择字典生成" value="" />
+      <el-form-item label="所属类型" prop="projectTypeId">
+        <el-select v-model="queryParams.projectTypeId" placeholder="请选择所属类型" clearable size="small">
+          <el-option
+            v-for="item in projectTypeoptions"
+            :key="item.projectTypeId"
+            :label="item.projectTypeName"
+            :value="item.projectTypeId">
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="选题名称" prop="projectName">
         <el-input
           v-model="queryParams.projectName"
           placeholder="请输入选题名称"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createDate">
-        <el-date-picker clearable size="small"
-          v-model="queryParams.createDate"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择创建时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="选题状态" prop="state">
-        <el-select v-model="queryParams.state" placeholder="请选择选题状态" clearable size="small">
-          <el-option
-            v-for="dict in stateOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="备注" prop="remarks">
-        <el-input
-          v-model="queryParams.remarks"
-          placeholder="请输入备注"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -96,17 +74,17 @@
 
     <el-table v-loading="loading" :data="projectList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="选题id" align="center" prop="projectId" />
-      <el-table-column label="外键选题类型ID" align="center" prop="projectTypeId" />
-      <el-table-column label="选题名称" align="center" prop="projectName" />
-      <el-table-column label="选题简介" align="center" prop="projectDetail" />
+      <el-table-column label="编号" align="center" type="index" />
+      <el-table-column label="类型" align="center" prop="projectTypeName" />
+      <el-table-column label="名称" align="center" prop="projectName" />
+      <el-table-column label="简介" align="center" prop="projectDetail" />
       <el-table-column label="涉及技术" align="center" prop="projectTech" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="选题状态" align="center" prop="state" :formatter="stateFormat" />
+      <el-table-column label="状态" align="center" prop="state" :formatter="stateFormat"
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -127,7 +105,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -135,13 +113,17 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
     <!-- 添加或修改选题管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="外键选题类型ID" prop="projectTypeId">
-          <el-select v-model="form.projectTypeId" placeholder="请选择外键选题类型ID">
-            <el-option label="请选择字典生成" value="" />
+        <el-form-item label="选题类型" prop="projectTypeId">
+          <el-select v-model="form.projectTypeId" placeholder="请选择所属类型" clearable size="small">
+            <el-option
+              v-for="item in projectTypeoptions"
+              :key="item.projectTypeId"
+              :label="item.projectTypeName"
+              :value="item.projectTypeId">
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="选题名称" prop="projectName">
@@ -152,14 +134,6 @@
         </el-form-item>
         <el-form-item label="涉及技术" prop="projectTech">
           <el-input v-model="form.projectTech" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="创建时间" prop="createDate">
-          <el-date-picker clearable size="small"
-            v-model="form.createDate"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="选择创建时间">
-          </el-date-picker>
         </el-form-item>
         <el-form-item label="选题状态">
           <el-radio-group v-model="form.state">
@@ -184,7 +158,7 @@
 
 <script>
 import { listProject, getProject, delProject, addProject, updateProject, exportProject } from "@/api/service/project";
-
+import { listType} from "@/api/service/type";
 export default {
   name: "Project",
   components: {
@@ -201,6 +175,8 @@ export default {
       multiple: true,
       // 显示搜索条件
       showSearch: true,
+      //项目类型列表
+      projectTypeoptions: [],
       // 总条数
       total: 0,
       // 选题管理表格数据
@@ -219,9 +195,10 @@ export default {
         projectName: null,
         projectDetail: null,
         projectTech: null,
+        remarks: null,
+        projectTypeName: null,
         createDate: null,
         state: null,
-        remarks: null
       },
       // 表单参数
       form: {},
@@ -253,6 +230,7 @@ export default {
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
+    this.getProjrctType();
   },
   methods: {
     /** 查询选题管理列表 */
@@ -260,6 +238,14 @@ export default {
       this.loading = true;
       listProject(this.queryParams).then(response => {
         this.projectList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    getProjrctType(){
+      this.loading = true;
+      listType(this.queryParams).then(response => {
+        this.projectTypeoptions = response.rows;
         this.total = response.total;
         this.loading = false;
       });
