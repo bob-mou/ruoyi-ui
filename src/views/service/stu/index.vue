@@ -331,6 +331,7 @@
   </div>
 </template>
 
+
 <script>
 import { listStu, getStu, delStu, addStu, updateStu, exportStu,importTemplate,allListUniversity,allListCollege ,allListMajor,allListClass} from "@/api/service/stu";
 import { getToken } from "@/utils/auth";
