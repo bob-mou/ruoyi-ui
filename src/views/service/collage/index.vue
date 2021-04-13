@@ -10,14 +10,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="外键学校ID" prop="universityId">
-        <el-input
-          v-model="queryParams.universityId"
-          placeholder="请输入外键学校ID"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="所属学校" prop="universityId">
+        <el-select v-model="queryParams.universityId" placeholder="请选择所属学校" clearable size="small" >
+          <el-option
+            v-for="item in universityoptions"
+            :key="item.universityId"
+            :label="item.universityName"
+            :value="item.universityId">
+          </el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -75,7 +76,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="学院名" align="center" prop="collegeName" />
-      <el-table-column label="外键学校ID" align="center" prop="universityId" />
+      <el-table-column label="所属学校" align="center" prop="universityName" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -111,8 +112,15 @@
         <el-form-item label="学院名" prop="collegeName">
           <el-input v-model="form.collegeName" placeholder="请输入学院名" />
         </el-form-item>
-        <el-form-item label="外键学校ID" prop="universityId">
-          <el-input v-model="form.universityId" placeholder="请输入外键学校ID" />
+        <el-form-item label="所属学校" prop="universityId">
+          <el-select v-model="form.universityId" placeholder="请选择所属学校"  size="small" >
+            <el-option
+              v-for="item in universityoptions"
+              :key="item.universityId"
+              :label="item.universityName"
+              :value="item.universityId">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="学院状态">
           <el-radio-group v-model="form.state">
@@ -143,9 +151,17 @@
               <el-input v-model="scope.row.majorName" placeholder="请输入专业名称" />
             </template>
           </el-table-column>
-          <el-table-column label="外键学院ID" prop="collegeId">
+          <el-table-column label="所属学院" prop="collegeId">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.collegeId" placeholder="请输入外键学院ID" />
+              <el-input v-model="scope.row.collegeId" placeholder="请选择所属学院" />
+<!--              <el-select v-model="scope.row.collegeId" placeholder="请选择所属学院" clearable size="small" >-->
+<!--                <el-option-->
+<!--                  v-for="item in universityoptions"-->
+<!--                  :key="item.universityId"-->
+<!--                  :label="item.universityName"-->
+<!--                  :value="item.universityId">-->
+<!--                </el-option>-->
+<!--              </el-select>-->
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="createDate">
@@ -175,7 +191,7 @@
 
 <script>
 import { listCollage, getCollage, delCollage, addCollage, updateCollage, exportCollage } from "@/api/service/collage";
-
+import {allListUniversity} from "@/api/service/stu";
 export default {
   name: "Collage",
   components: {
@@ -198,6 +214,8 @@ export default {
       total: 0,
       // 学院管理表格数据
       collageList: [],
+      //学校列表
+      universityoptions: [],
       // 专业管理表格数据
       majorList: [],
       // 弹出层标题
@@ -238,6 +256,7 @@ export default {
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
+    this.getAllUniversity();
   },
   methods: {
     /** 查询学院管理列表 */
@@ -248,6 +267,12 @@ export default {
         this.total = response.total;
         this.loading = false;
       });
+    },
+    //获取所有学校
+    getAllUniversity(){
+      allListUniversity().then( res =>{
+        this.universityoptions=res;
+      })
     },
     // 学校状态字典翻译
     stateFormat(row, column) {
