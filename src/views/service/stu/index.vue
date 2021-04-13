@@ -170,6 +170,9 @@
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <div class="text-center">
+            <detail :stu="scope.row" />
+          </div>
           <el-button
             size="mini"
             type="text"
@@ -335,9 +338,10 @@
 <script>
 import { listStu, getStu, delStu, addStu, updateStu, exportStu,importTemplate,allListUniversity,allListCollege ,allListMajor,allListClass} from "@/api/service/stu";
 import { getToken } from "@/utils/auth";
+import detail from "./detail";
 export default {
   name: "Stu",
-  components: {
+  components: {detail
   },
   data() {
     return {

@@ -51,3 +51,11 @@ export function exportUniversity(query) {
     params: query
   })
 }
+//上传文件
+export function  uploadAvatar(data){
+  return request({
+    url: '/service/university/logos',
+    method: 'post',
+    data: data
+  })
+}
