@@ -153,20 +153,25 @@
           </el-table-column>
           <el-table-column label="所属学院" prop="collegeId">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.collegeId" placeholder="请选择所属学院" />
-<!--              <el-select v-model="scope.row.collegeId" placeholder="请选择所属学院" clearable size="small" >-->
-<!--                <el-option-->
-<!--                  v-for="item in universityoptions"-->
-<!--                  :key="item.universityId"-->
-<!--                  :label="item.universityName"-->
-<!--                  :value="item.universityId">-->
-<!--                </el-option>-->
-<!--              </el-select>-->
+<!--              <el-input v-model="scope.row.collegeId" placeholder="请选择所属学院" />-->
+              <el-select v-model="scope.row.collegeId" placeholder="请选择所属学院" clearable size="small" >
+                <el-option
+                  v-for="item in collegeoptions"
+                  :key="item.collegeId"
+                  :label="item.collegeName"
+                  :value="item.collegeId">
+                </el-option>
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column label="创建时间" prop="createDate">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.createDate" placeholder="请输入创建时间" />
+<!--              <el-input v-model="scope.row.createDate" placeholder="请选择创建时间" />-->
+              <el-date-picker
+                v-model="scope.row.createDate"
+                type="datetime"
+                placeholder="选择日期时间">
+              </el-date-picker>
             </template>
           </el-table-column>
           <el-table-column label="学院状态" prop="state">
@@ -191,7 +196,7 @@
 
 <script>
 import { listCollage, getCollage, delCollage, addCollage, updateCollage, exportCollage } from "@/api/service/collage";
-import {allListUniversity} from "@/api/service/stu";
+import {allListUniversity,allListCollege} from "@/api/service/stu";
 export default {
   name: "Collage",
   components: {
@@ -216,6 +221,8 @@ export default {
       collageList: [],
       //学校列表
       universityoptions: [],
+      //学院列表
+      collegeoptions:[],
       // 专业管理表格数据
       majorList: [],
       // 弹出层标题
@@ -240,7 +247,7 @@ export default {
           { required: true, message: "学院名不能为空", trigger: "blur" }
         ],
         universityId: [
-          { required: true, message: "外键学校ID不能为空", trigger: "blur" }
+          { required: true, message: "所属学校不能为空", trigger: "blur" }
         ],
         createTime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -320,14 +327,19 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      //console.log(row)
       this.reset();
       const collegeId = row.collegeId || this.ids
       getCollage(collegeId).then(response => {
+        //console.log(response.data);
         this.form = response.data;
         this.majorList = response.data.majorList;
         this.open = true;
         this.title = "修改学院管理";
       });
+      allListCollege({universityId:row.universityId}).then( res =>{
+        this.collegeoptions=res;
+      })
     },
     /** 提交按钮 */
     submitForm() {
@@ -382,8 +394,25 @@ export default {
     handleDeleteMajor() {
       if (this.checkedMajor.length == 0) {
         this.$alert("请先选择要删除的专业管理数据", "提示", { confirmButtonText: "确定", });
-      } else {
-        this.majorList.splice(this.checkedMajor[0].index - 1, 1);
+      }
+      else {
+        //删除提示消息
+        this.$confirm('此操作将永久删除当前学院下的专业以及专业下的所有数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.majorList.splice(this.checkedMajor[0].index - 1, 1);
+          // this.$message({
+          //   type: 'success',
+          //   message: '删除成功!'
+          // });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
       }
     },
     /** 单选框选中数据 */

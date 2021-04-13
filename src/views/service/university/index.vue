@@ -109,23 +109,8 @@
         <el-form-item label="学校名" prop="universityName">
           <el-input v-model="form.universityName" placeholder="请输入学校名" />
         </el-form-item>
-        <el-form-item label="学校logo" prop="logoPath" >
-          <el-upload
-            v-model="form.logoPath"
-            ref="upload"
-            action="#"
-            :http-request="requestUpload"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :limit="1"
-            :on-exceed="handleExceed"
-            :before-upload="beforeAvatarUpload"
-            :file-list="fileList"
-            :auto-upload="false"
-            list-type="picture">
-            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-          </el-upload>
+        <el-form-item label="学校logo" prop="logoPath">
+          <el-input v-model="form.logoPath" placeholder="请输入学校logo" />
         </el-form-item>
         <el-form-item label="学校地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入学校地址" />
@@ -161,13 +146,13 @@
           </el-table-column>
           <el-table-column label="学院状态" prop="state">
             <template slot-scope="scope">
-              <el-radio-group v-model="scope.row.state" placeholder="请输入学校状态">
-                <el-radio
-                  v-for="dict in stateOptions"
-                  :key="dict.dictValue"
-                  :label="parseInt(dict.dictValue)"
-                >{{dict.dictLabel}}</el-radio>
-              </el-radio-group>
+                <el-radio-group v-model="scope.row.state" placeholder="请输入学院状态">
+                  <el-radio
+                    v-for="dict in stateOptions"
+                    :key="dict.dictValue"
+                    :label="parseInt(dict.dictValue)"
+                  >{{dict.dictLabel}}</el-radio>
+                </el-radio-group>
             </template>
           </el-table-column>
           <el-table-column label="备注" prop="remarks">
@@ -186,163 +171,161 @@
 </template>
 
 <script>
-  import { listUniversity, getUniversity, delUniversity, addUniversity, updateUniversity, exportUniversity,uploadAvatar } from "@/api/service/university";
+import { listUniversity, getUniversity, delUniversity, addUniversity, updateUniversity, exportUniversity } from "@/api/service/university";
 
-  export default {
-    name: "University",
-    components: {
-    },
-    data() {
-      return {
-        // 遮罩层
-        loading: true,
-        // 选中数组
-        ids: [],
-        // 子表选中数据
-        checkedCollege: [],
-        // 非单个禁用
-        single: true,
-        // 非多个禁用
-        multiple: true,
-        // 显示搜索条件
-        showSearch: true,
-        // 总条数
-        total: 0,
-        // 学校管理表格数据
-        universityList: [],
-        // 学院管理表格数据
-        collegeList: [],
-        // 学校状态字典
-        stateOptions: [],
-        // 弹出层标题
-        title: "",
-        // 是否显示弹出层
-        open: false,
-        fileList:[],
-        // 查询参数
-        queryParams: {
-          pageNum: 1,
-          pageSize: 10,
-          universityName: null,
-          address: null,
-          state: null,
-        },
-        // 表单参数
-        form: {},
-        // 表单校验
-        rules: {
-          universityName: [
-            { required: true, message: "学校名不能为空", trigger: "blur" }
-          ],
-          logoPath: [
-            { required: true, message: "学校logo不能为空", trigger: "blur" }
-          ],
-          address: [
-            { required: true, message: "学校地址不能为空", trigger: "blur" }
-          ],
-          createTime: [
-            { required: true, message: "学校地址不能为空", trigger: "blur" }
-          ],
-          state: [
-            { required: true, message: "学校状态不能为空", trigger: "blur" }
-          ],
-        }
-      };
-    },
-    created() {
-      this.getList();
-      this.getDicts("sys_normal_disable").then(response => {
-        this.stateOptions = response.data;
+export default {
+  name: "University",
+  components: {
+  },
+  data() {
+    return {
+      // 遮罩层
+      loading: true,
+      // 选中数组
+      ids: [],
+      // 子表选中数据
+      checkedCollege: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
+      // 显示搜索条件
+      showSearch: true,
+      // 总条数
+      total: 0,
+      // 学校管理表格数据
+      universityList: [],
+      // 学院管理表格数据
+      collegeList: [],
+      // 学校状态字典
+      stateOptions: [],
+      // 弹出层标题
+      title: "",
+      // 是否显示弹出层
+      open: false,
+      // 查询参数
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        universityName: null,
+        address: null,
+        state: null,
+      },
+      // 表单参数
+      form: {},
+      // 表单校验
+      rules: {
+        universityName: [
+          { required: true, message: "学校名不能为空", trigger: "blur" }
+        ],
+        logoPath: [
+          { required: true, message: "学校logo不能为空", trigger: "blur" }
+        ],
+        address: [
+          { required: true, message: "学校地址不能为空", trigger: "blur" }
+        ],
+        createTime: [
+          { required: true, message: "学校地址不能为空", trigger: "blur" }
+        ],
+        state: [
+          { required: true, message: "学校状态不能为空", trigger: "blur" }
+        ],
+      }
+    };
+  },
+  created() {
+    this.getList();
+    this.getDicts("sys_normal_disable").then(response => {
+      this.stateOptions = response.data;
+    });
+  },
+  methods: {
+    /** 查询学校管理列表 */
+    getList() {
+      this.loading = true;
+      listUniversity(this.queryParams).then(response => {
+        this.universityList = response.rows;
+        this.total = response.total;
+        this.loading = false;
       });
     },
-    methods: {
-      /** 查询学校管理列表 */
-      getList() {
-        this.loading = true;
-        listUniversity(this.queryParams).then(response => {
-          this.universityList = response.rows;
-          this.total = response.total;
-          this.loading = false;
-        });
-      },
-      // 取消按钮
-      cancel() {
-        this.open = false;
-        this.reset();
-      },
-      // 表单重置
-      reset() {
-        this.form = {
-          universityId: null,
-          universityName: null,
-          logoPath: null,
-          address: null,
-          createTime: null,
-          state: null,
-          remarks: null
-        };
-        this.collegeList = [];
-        this.resetForm("form");
-      },
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.pageNum = 1;
-        this.getList();
-      },
-      /** 重置按钮操作 */
-      resetQuery() {
-        this.resetForm("queryForm");
-        this.handleQuery();
-      },
-      // 多选框选中数据
-      handleSelectionChange(selection) {
-        this.ids = selection.map(item => item.universityId)
-        this.single = selection.length!==1
-        this.multiple = !selection.length
-      },
-      /** 新增按钮操作 */
-      handleAdd() {
-        this.reset();
+    // 取消按钮
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
+    // 表单重置
+    reset() {
+      this.form = {
+        universityId: null,
+        universityName: null,
+        logoPath: null,
+        address: null,
+        createTime: null,
+        state: null,
+        remarks: null
+      };
+      this.collegeList = [];
+      this.resetForm("form");
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.pageNum = 1;
+      this.getList();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.handleQuery();
+    },
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.universityId)
+      this.single = selection.length!==1
+      this.multiple = !selection.length
+    },
+    /** 新增按钮操作 */
+    handleAdd() {
+      this.reset();
+      this.open = true;
+      this.title = "添加学校管理";
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.reset();
+      const universityId = row.universityId || this.ids
+      getUniversity(universityId).then(response => {
+        this.form = response.data;
+        this.collegeList = response.data.collegeList;
         this.open = true;
-        this.title = "添加学校管理";
-      },
-      /** 修改按钮操作 */
-      handleUpdate(row) {
-        this.reset();
-        const universityId = row.universityId || this.ids
-        getUniversity(universityId).then(response => {
-          this.form = response.data;
-          this.collegeList = response.data.collegeList;
-          this.open = true;
-          this.title = "修改学校管理";
-        });
-      },
-      /** 提交按钮 */
-      submitForm() {
-        this.$refs["form"].validate(valid => {
-          if (valid) {
-            this.form.collegeList = this.collegeList;
-            if (this.form.universityId != null) {
-              updateUniversity(this.form).then(response => {
-                this.msgSuccess("修改成功");
-                this.open = false;
-                this.getList();
-              });
-            } else {
-              console.log("运行到这里成功4：》》");
-              addUniversity(this.form).then(response => {
-                this.msgSuccess("新增成功"+response);
-                this.open = false;
-                this.getList();
-              });
-            }
+        this.title = "修改学校管理";
+      });
+    },
+    /** 提交按钮 */
+    submitForm() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.form.collegeList = this.collegeList;
+          if (this.form.universityId != null) {
+            updateUniversity(this.form).then(response => {
+              this.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
+          } else {
+            addUniversity(this.form).then(response => {
+              this.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
           }
-        });
-      },
-      /** 删除按钮操作 */
-      handleDelete(row) {
-        const universityIds = row.universityId || this.ids;
-        this.$confirm('是否确认删除学校管理编号为"' + universityIds + '"的数据项?', "警告", {
+        }
+      });
+    },
+    /** 删除按钮操作 */
+    handleDelete(row) {
+      const universityIds = row.universityId || this.ids;
+      this.$confirm('是否确认删除学校管理编号为"' + universityIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
@@ -352,40 +335,52 @@
           this.getList();
           this.msgSuccess("删除成功");
         })
-      },
-      /** 学院管理序号 */
-      rowCollegeIndex({ row, rowIndex }) {
-        row.index = rowIndex + 1;
-      },
-      /** 学院管理添加按钮操作 */
-      handleAddCollege() {
-        let obj = {};
-        obj.collegeName = "";
-        obj.state = "";
-        obj.remarks = "";
-        this.collegeList.push(obj);
-      },
-      /** 学院管理删除按钮操作 */
-      handleDeleteCollege() {
-        if (this.checkedCollege.length == 0) {
-          this.$alert("请先选择要删除的学院管理数据", "提示", { confirmButtonText: "确定", });
-        } else {
+    },
+	/** 学院管理序号 */
+    rowCollegeIndex({ row, rowIndex }) {
+      row.index = rowIndex + 1;
+    },
+    /** 学院管理添加按钮操作 */
+    handleAddCollege() {
+      let obj = {};
+      obj.collegeName = "";
+      obj.state = "";
+      obj.remarks = "";
+      this.collegeList.push(obj);
+    },
+    /** 学院管理删除按钮操作 */
+    handleDeleteCollege() {
+      if (this.checkedCollege.length == 0) {
+        this.$alert("请先选择要删除的学院管理数据", "提示", { confirmButtonText: "确定", });
+      } else {
+        this.$confirm('此操作将永久删除当前学院下的专业以及专业下的所有数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
           this.collegeList.splice(this.checkedCollege[0].index - 1, 1);
-        }
-      },
-      /** 单选框选中数据 */
-      handleCollegeSelectionChange(selection) {
-        if (selection.length > 1) {
-          this.$refs.college.clearSelection();
-          this.$refs.college.toggleRowSelection(selection.pop());
-        } else {
-          this.checkedCollege = selection;
-        }
-      },
-      /** 导出按钮操作 */
-      handleExport() {
-        const queryParams = this.queryParams;
-        this.$confirm('是否确认导出所有学校管理数据项?', "警告", {
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+        // this.collegeList.splice(this.checkedCollege[0].index - 1, 1);
+      }
+    },
+    /** 单选框选中数据 */
+    handleCollegeSelectionChange(selection) {
+      if (selection.length > 1) {
+        this.$refs.college.clearSelection();
+        this.$refs.college.toggleRowSelection(selection.pop());
+      } else {
+        this.checkedCollege = selection;
+      }
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+      const queryParams = this.queryParams;
+      this.$confirm('是否确认导出所有学校管理数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
@@ -394,36 +389,7 @@
         }).then(response => {
           this.download(response.msg);
         })
-      },
-      //头像上传
-      // 覆盖默认的上传行为
-      requestUpload() {
-        console.log("运行到这里成功1：》》");
-        this.$refs.upload.submit().then(data => {
-          this.msgSuccess("运行到这里成功2：》》");
-          let formData = new FormData();
-          formData.append("avatarfile", data);
-          uploadAvatar(formData).then(response => {
-            this.msgSuccess("提交成功：》》"+response);
-            console.log("提交成功：》》"+response);
-          })
-        });
-        console.log("运行到这里成功3：》》");
-      },
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
-      handlePreview(file){
-        console.log(file.name);
-      },
-      handleExceed(files, fileList){
-        this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-      },
-      beforeAvatarUpload(file){
-        console.log("beforeAvatarUploadfile.name:>>"+file.name);
-        this.form.logoPath=file.name;
-        console.log("beforeAvatarUploadfile.name:>>"+this.form.logoPath);
-      }
     }
-  };
+  }
+};
 </script>
