@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="学生学号" prop="stuNumber">
+      <el-form-item label="学号" prop="stuNumber">
         <el-input
           v-model="queryParams.stuNumber"
           placeholder="请输入学生学号"
@@ -28,15 +28,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="学生QQ号" prop="stuQq">
-        <el-input
-          v-model="queryParams.stuQq"
-          placeholder="请输入学生QQ号"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+<!--      <el-form-item label="学历" prop="stuEducation">-->
+<!--        <el-input-->
+<!--          v-model="queryParams.stuEducation"-->
+<!--          placeholder="请输入学历"-->
+<!--          clearable-->
+<!--          size="small"-->
+<!--          @keyup.enter.native="handleQuery"-->
+<!--        />-->
+<!--      </el-form-item>-->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -101,22 +101,22 @@
 
     <el-table v-loading="loading" :data="stuList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="编号" align="center" type="index" />
+      <el-table-column v-if="idshow" align="center" prop="stuId"  />
+      <el-table-column label="编号" align="center" type="index"  />
       <el-table-column label="学生学号" align="center" prop="stuNumber" />
-      <el-table-column label="所属班级ID" align="center" prop="classId" />
-      <el-table-column label="所属专业ID" align="center" prop="majorId" />
-      <el-table-column label="所属学院ID" align="center" prop="collegeId" />
-      <el-table-column label="所属学校ID" align="center" prop="universityId" />
       <el-table-column label="学生姓名" align="center" prop="stuName" />
+      <el-table-column label="所属学校" align="center" prop="universityName" />
+      <el-table-column label="所属学院" align="center" prop="collegeName" />
+      <el-table-column label="所属专业" align="center" prop="majorName" />
+      <el-table-column label="所属班级" align="center" prop="className" />
+<!--      <el-table-column label="学校类型" align="center" prop="schoolType" :formatter="schoolTypeFormat" />-->
+<!--      <el-table-column label="毕设名称" align="center" prop="projectName" />-->
+<!--      <el-table-column label="毕设描述" align="center" prop="projectDetail" />-->
       <el-table-column label="学生手机号" align="center" prop="stuPhone" />
       <el-table-column label="学生QQ号" align="center" prop="stuQq" />
       <el-table-column label="学生邮箱" align="center" prop="stuEmail" />
       <el-table-column label="学历" align="center" prop="stuEducation" />
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="学生状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -146,23 +146,67 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改学生表对话框 -->
+    <!-- 添加或修改学生管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="学生学号" prop="stuNumber">
           <el-input v-model="form.stuNumber" placeholder="请输入学生学号" />
         </el-form-item>
-        <el-form-item label="所属班级ID" prop="classId">
-          <el-input v-model="form.classId" placeholder="请输入所属班级ID" />
+        <el-form-item label="所属学校" prop="universityId">
+          <el-select v-model="form.universityId" placeholder="请选择所属学校" @change="getUniversityValue">
+            <el-option
+              v-for="item in universityoptions"
+              :key="item.universityId"
+              :label="item.universityName"
+              :value="item.universityId">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="所属专业ID" prop="majorId">
-          <el-input v-model="form.majorId" placeholder="请输入所属专业ID" />
+        <el-form-item label="所属学院" prop="collegeId">
+          <el-select v-model="form.collegeId" placeholder="请选择所属学院" @change="getCollegeValue">
+            <el-option
+              v-for="item in collegeoptions"
+              :key="item.collegeId"
+              :label="item.collegeName"
+              :value="item.collegeId">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="所属学院ID" prop="collegeId">
-          <el-input v-model="form.collegeId" placeholder="请输入所属学院ID" />
+        <el-form-item label="所属专业" prop="majorId">
+          <el-select v-model="form.majorId" placeholder="请选择所属专业" @change="getMajorValue">
+            <el-option
+              v-for="item in majoroptions"
+              :key="item.majorId"
+              :label="item.majorName"
+              :value="item.majorId">
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="所属学校ID" prop="universityId">
-          <el-input v-model="form.universityId" placeholder="请输入所属学校ID" />
+        <el-form-item label="所属班级" prop="classId">
+          <el-select v-model="form.classId" placeholder="请选择所属班级">
+            <el-option
+              v-for="item in classoptions"
+              :key="item.classId"
+              :label="item.className"
+              :value="item.classId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="学校类型" prop="schoolType">
+          <el-select v-model="form.schoolType" placeholder="请选择学校类型">
+            <el-option
+              v-for="dict in schoolTypeOptions"
+              :key="dict.dictValue"
+              :label="dict.dictLabel"
+              :value="dict.dictValue"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="毕设名称" prop="projectName">
+          <el-input v-model="form.projectName" placeholder="请输入毕设名称" />
+        </el-form-item>
+        <el-form-item label="毕设描述" prop="projectDetail">
+          <el-input v-model="form.projectDetail" placeholder="请输入毕设描述" />
         </el-form-item>
         <el-form-item label="学生姓名" prop="stuName">
           <el-input v-model="form.stuName" placeholder="请输入学生姓名" />
@@ -177,7 +221,15 @@
           <el-input v-model="form.stuEmail" placeholder="请输入学生邮箱" />
         </el-form-item>
         <el-form-item label="学历" prop="stuEducation">
-          <el-input v-model="form.stuEducation" placeholder="请输入学历" />
+<!--          <el-input v-model="form.stuEducation" placeholder="请输入学历" />-->
+          <el-select v-model="form.stuEducation" placeholder="请选择学历" >
+            <el-option
+              v-for="item in educationoptions"
+              :key="item.educationkey"
+              :label="item.educationvalue"
+              :value="item.educationkey">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="学生状态">
           <el-radio-group v-model="form.state">
@@ -198,7 +250,7 @@
       </div>
     </el-dialog>
     <!-- 用户导入对话框 -->
-    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body :before-close="closedialog">
       <el-upload
         ref="upload"
         :limit="1"
@@ -217,7 +269,6 @@
           <em>点击上传</em>
         </div>
         <div class="el-upload__tip" slot="tip">
-          <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的用户数据
           <el-link type="info" style="font-size:12px" @click="importTemplate">下载模板</el-link>
         </div>
         <div class="el-upload__tip" style="color:red" slot="tip">提示：仅允许导入“xls”或“xlsx”格式文件！</div>
@@ -231,7 +282,7 @@
 </template>
 
 <script>
-import { listStu, getStu, delStu, addStu, updateStu, exportStu,importTemplate } from "@/api/service/stu";
+import { listStu, getStu, delStu, addStu, updateStu, exportStu,importTemplate,allListUniversity,allListCollege ,allListMajor,allListClass} from "@/api/service/stu";
 import { getToken } from "@/utils/auth";
 export default {
   name: "Stu",
@@ -239,6 +290,7 @@ export default {
   },
   data() {
     return {
+      idshow: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -251,12 +303,29 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 学生表表格数据
+      // 学生管理表格数据
       stuList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
+      //学校列表
+      universityoptions: [],
+      //学院列表
+      collegeoptions: [],
+      //专业列表
+      majoroptions: [],
+      //班级列表
+      classoptions: [],
+      //学历
+      educationoptions:[
+        {educationkey:3,educationvalue:'大专'},
+        {educationkey:1,educationvalue:'本科'},
+        {educationkey:2,educationvalue:'研究生'},
+        {educationkey:4,educationvalue:'博士'}
+      ],
+      // 学校类型字典
+      schoolTypeOptions: [],
       // 学生状态字典
       stateOptions: [],
       // 查询参数
@@ -266,7 +335,7 @@ export default {
         stuNumber: null,
         stuName: null,
         stuPhone: null,
-        stuQq: null,
+        stuEducation: null,
       },
       // 用户导入参数
       upload: {
@@ -289,18 +358,21 @@ export default {
         stuNumber: [
           { required: true, message: "学生学号不能为空", trigger: "blur" }
         ],
-        classId: [
-          { required: true, message: "所属班级ID不能为空", trigger: "blur" }
-        ],
-        majorId: [
-          { required: true, message: "所属专业ID不能为空", trigger: "blur" }
+        universityId: [
+          { required: true, message: "所属学校不能为空", trigger: "change" }
         ],
         collegeId: [
-          { required: true, message: "所属学院ID不能为空", trigger: "blur" }
+          { required: true, message: "所属学院不能为空", trigger: "change" }
         ],
-        universityId: [
-          { required: true, message: "所属学校ID不能为空", trigger: "blur" }
+        majorId: [
+          { required: true, message: "所属专业不能为空", trigger: "change" }
         ],
+        classId: [
+          { required: true, message: "所属班级不能为空", trigger: "change" }
+        ],
+        // schoolType: [
+        //   { required: true, message: "学校类型不能为空", trigger: "change" }
+        // ],
         stuName: [
           { required: true, message: "学生姓名不能为空", trigger: "blur" }
         ],
@@ -324,12 +396,16 @@ export default {
   },
   created() {
     this.getList();
+    this.getDicts("school_type").then(response => {
+      this.schoolTypeOptions = response.data;
+    });
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
+    this.getAllUniversity();
   },
   methods: {
-    /** 查询学生表列表 */
+    /** 查询学生管理列表 */
     getList() {
       this.loading = true;
       listStu(this.queryParams).then(response => {
@@ -337,6 +413,76 @@ export default {
         this.total = response.total;
         this.loading = false;
       });
+    },
+    //查询学校列表
+    getAllUniversity(){
+      allListUniversity().then( response =>{
+        this.universityoptions=response;
+      })
+    },
+    //学校下拉框选中学校
+    getUniversityValue(){
+      this.collegeoptions=[];
+      this.majoroptions=[];
+      this.classoptions=[]
+      this.queryParams.collegeId=null;
+      this.queryParams.majorId=null;
+      this.queryParams.classId=null;
+      this.form.collegeId=null;
+      this.form.majorId=null;
+      this.form.classId=null;
+      if(this.queryParams.universityId||this.form.universityId){
+        let param={};
+        if(this.queryParams.universityId){
+          param={universityId: this.queryParams.universityId}
+        }else{
+          param={universityId: this.form.universityId}
+        }
+        allListCollege(param).then(response =>{
+          this.collegeoptions=response;
+        })
+      }
+    },
+    //学院下拉框选中值
+    getCollegeValue(){
+      this.majoroptions=[];
+      this.classoptions=[];
+      this.queryParams.majorId=null;
+      this.queryParams.classId=null;
+      this.form.majorId=null;
+      this.form.classId=null;
+      if(this.queryParams.collegeId||this.form.collegeId){
+        let param={};
+        if(this.queryParams.collegeId){
+          param={collegeId: this.queryParams.collegeId}
+        }else{
+          param={collegeId: this.form.collegeId}
+        }
+        allListMajor(param).then(response =>{
+          this.majoroptions=response;
+        })
+      }
+    },
+    //专业下拉框选中值
+    getMajorValue(){
+      this.classoptions=[];
+      this.queryParams.classId=null;
+      this.form.classId=null;
+      if(this.queryParams.majorId||this.form.majorId){
+        let param={};
+        if(this.queryParams.majorId){
+          param={majorId: this.queryParams.majorId}
+        }else{
+          param={majorId: this.form.majorId}
+        }
+        allListClass(param).then(response =>{
+          this.classoptions=response;
+        })
+      }
+    },
+    // 学校类型字典翻译
+    schoolTypeFormat(row, column) {
+      return this.selectDictLabel(this.schoolTypeOptions, row.schoolType);
     },
     // 学生状态字典翻译
     stateFormat(row, column) {
@@ -346,6 +492,9 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      this.collegeoptions=null;
+      this.majoroptions=null;
+      this.classoptions=null;
     },
     // 表单重置
     reset() {
@@ -356,6 +505,9 @@ export default {
         majorId: null,
         collegeId: null,
         universityId: null,
+        schoolType: null,
+        projectName: null,
+        projectDetail: null,
         stuName: null,
         stuPhone: null,
         stuQq: null,
@@ -387,7 +539,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加学生表";
+      this.title = "添加学生管理";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -396,11 +548,14 @@ export default {
       getStu(stuId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改学生表";
+        this.title = "修改学生管理";
       });
     },
     /** 提交按钮 */
     submitForm() {
+      this.collegeoptions=null;
+      this.majoroptions=null;
+      this.classoptions=null;
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.stuId != null) {
@@ -419,10 +574,17 @@ export default {
         }
       });
     },
+    /**关闭导入框*/
+    closedialog(){
+      console.log("close")
+      this.collegeoptions=null;
+      this.majoroptions=null;
+      this.classoptions=null;
+    },
     /** 删除按钮操作 */
     handleDelete(row) {
       const stuIds = row.stuId || this.ids;
-      this.$confirm('是否确认删除学生表编号为"' + stuIds + '"的数据项?', "警告", {
+      this.$confirm('是否确认删除学生管理编号为"' + stuIds + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
@@ -436,7 +598,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$confirm('是否确认导出所有学生表数据项?', "警告", {
+      this.$confirm('是否确认导出所有学生管理数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询学生管理列表
+// 查询学生表列表
 export function listStu(query) {
   return request({
     url: '/service/stu/list',
@@ -9,7 +9,7 @@ export function listStu(query) {
   })
 }
 
-// 查询学生管理详细
+// 查询学生表详细
 export function getStu(stuId) {
   return request({
     url: '/service/stu/' + stuId,
@@ -17,7 +17,7 @@ export function getStu(stuId) {
   })
 }
 
-// 新增学生管理
+// 新增学生表
 export function addStu(data) {
   return request({
     url: '/service/stu',
@@ -26,7 +26,7 @@ export function addStu(data) {
   })
 }
 
-// 修改学生管理
+// 修改学生表
 export function updateStu(data) {
   return request({
     url: '/service/stu',
@@ -35,15 +35,45 @@ export function updateStu(data) {
   })
 }
 
-// 删除学生管理
+// 删除学生表
 export function delStu(stuId) {
   return request({
     url: '/service/stu/' + stuId,
     method: 'delete'
   })
 }
-
-// 导出学生管理
+//查询所有学校列表
+export function allListUniversity() {
+  return request({
+    url: '/service/stu/alluniversitylist',
+    method: 'get',
+  })
+}
+//查询学校下的所有学院
+export function allListCollege(query){
+  return request({
+    url: '/service/stu/allcollegelist',
+    method: 'get',
+    params: query
+  })
+}
+//查询学院下所有专业
+export function allListMajor(query){
+  return request({
+    url: '/service/stu/allmajorlist',
+    method:'get',
+    params: query
+  })
+}
+//查询专业下所有班级
+export function allListClass(query){
+  return request({
+    url: '/service/stu/allclasslist',
+    method:'get',
+    params: query
+  })
+}
+// 导出学生表
 export function exportStu(query) {
   return request({
     url: '/service/stu/export',
