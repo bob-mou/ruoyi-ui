@@ -202,9 +202,6 @@
     <!-- 添加或修改学生管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body @close="closedialog">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="学生学号" prop="stuNumber">
-          <el-input v-model="form.stuNumber" placeholder="请输入学生学号" />
-        </el-form-item>
         <el-form-item label="所属学校" prop="universityId">
           <el-select v-model="form.universityId" placeholder="请选择所属学校" @change="getUniversityValue">
             <el-option
@@ -255,11 +252,8 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="毕设名称" prop="projectName">
-          <el-input v-model="form.projectName" placeholder="请输入毕设名称" />
-        </el-form-item>
-        <el-form-item label="毕设描述" prop="projectDetail">
-          <el-input v-model="form.projectDetail" placeholder="请输入毕设描述" />
+        <el-form-item label="学生学号" prop="stuNumber">
+          <el-input v-model="form.stuNumber" placeholder="请输入学生学号" />
         </el-form-item>
         <el-form-item label="学生姓名" prop="stuName">
           <el-input v-model="form.stuName" placeholder="请输入学生姓名" />
@@ -282,6 +276,12 @@
               :value="item.educationkey">
             </el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="毕设名称" prop="projectName">
+          <el-input v-model="form.projectName" placeholder="请输入毕设名称" />
+        </el-form-item>
+        <el-form-item label="毕设描述" prop="projectDetail">
+          <el-input v-model="form.projectDetail" placeholder="请输入毕设描述" />
         </el-form-item>
         <el-form-item label="学生状态">
           <el-radio-group v-model="form.state">
@@ -636,11 +636,11 @@ export default {
     },
     /** 提交按钮 */
     submitForm() {
-      this.collegeoptions=null;
-      this.majoroptions=null;
-      this.classoptions=null;
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.collegeoptions=null;
+          this.majoroptions=null;
+          this.classoptions=null;
           if (this.form.stuId != null) {
             updateStu(this.form).then(response => {
               this.msgSuccess("修改成功");
@@ -675,7 +675,12 @@ export default {
         }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
+        }).catch(()=>{
+          this.$message({
+            type: 'info',
+            message: '取消删除'
+          });
+      })
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -688,7 +693,12 @@ export default {
           return exportStu(queryParams);
         }).then(response => {
           this.download(response.msg);
-        })
+        }).catch(()=>{
+          this.$message({
+            type: 'info',
+            message: '取消导出'
+          });
+      })
     },
     /** 导入按钮操作 */
     handleImport() {
