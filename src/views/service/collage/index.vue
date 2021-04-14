@@ -174,9 +174,15 @@
               </el-date-picker>
             </template>
           </el-table-column>
-          <el-table-column label="学院状态" prop="state">
+          <el-table-column label="专业状态" prop="state">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.state" placeholder="请输入学院状态" />
+              <el-radio-group v-model="scope.row.state">
+                <el-radio
+                  v-for="dict in stateOptions"
+                  :key="dict.dictValue"
+                  :label="parseInt(dict.dictValue)"
+                >{{dict.dictLabel}}</el-radio>
+              </el-radio-group>
             </template>
           </el-table-column>
           <el-table-column label="备注" prop="remarks">
