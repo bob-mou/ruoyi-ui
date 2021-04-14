@@ -1,7 +1,6 @@
 <template>
   <div>
-    <div class="user-info-head" @click="editCropper()">
-      <img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
+    <div class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body @opened="modalOpened">
       <el-row>
         <el-col :xs="24" :md="12" :style="{height: '350px'}">
@@ -122,7 +121,7 @@ export default {
     },
     // 上传图片
     uploadImg() {
-      this.$refs.cropper.submit(data => {
+      this.$refs.cropper.getCropBlob(data => {
         let formData = new FormData();
         formData.append("avatarfile", data);
         uploadAvatar(formData).then(response => {
