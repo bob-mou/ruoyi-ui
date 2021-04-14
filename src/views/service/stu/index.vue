@@ -165,7 +165,7 @@
       <el-table-column label="学生手机号" align="center" prop="stuPhone" />
       <el-table-column label="学生QQ号" align="center" prop="stuQq" />
       <el-table-column label="学生邮箱" align="center" prop="stuEmail" />
-      <el-table-column label="学历" align="center" prop="stuEducation" />
+      <el-table-column label="学历" align="center" prop="stuEducation"  :formatter="educationFormat" />
       <el-table-column label="学生状态" align="center" prop="state" :formatter="stateFormat" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -274,7 +274,6 @@
           <el-input v-model="form.stuEmail" placeholder="请输入学生邮箱" />
         </el-form-item>
         <el-form-item label="学历" prop="stuEducation">
-<!--          <el-input v-model="form.stuEducation" placeholder="请输入学历" />-->
           <el-select v-model="form.stuEducation" placeholder="请选择学历" >
             <el-option
               v-for="item in educationoptions"
@@ -544,6 +543,19 @@ export default {
     // 学生状态字典翻译
     stateFormat(row, column) {
       return this.selectDictLabel(this.stateOptions, row.state);
+    },
+    educationFormat(row) {
+      if(row.stuEducation===1){
+        return "本科";
+      }else if(row.stuEducation===2){
+        return "研究生";
+      }
+      else if(row.stuEducation===3){
+        return "博士";
+        }
+      else if(row.stuEducation===4){
+        return "大专";
+      }
     },
     // 取消按钮
     cancel() {
