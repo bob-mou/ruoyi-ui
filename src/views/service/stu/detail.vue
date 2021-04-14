@@ -112,9 +112,9 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="学生状态" prop="stu.state">
+            <el-form-item label="学生状态" prop="state">
                 <P align="left" style="margin: 0" >
-                  {{stu.state=1?'异常':'正常'}}
+                  {{stu.state==1?'异常':'正常'}}
                 </P>
             </el-form-item>
           </el-col>
@@ -142,16 +142,13 @@ import { getStu } from '@/api/service/stu'
 
 export default {
     props: {
-      stu: {
-        type:Object,
-      }
+      stuId:'',
     },
     data() {
       return {
         dialogVisible: false,
-        stu: {},
         title:"学生详情",
-        stuId: null,
+        stu:{},
         //学历
         educationoptions:[
           {educationkey:3,educationvalue:'大专'},
@@ -159,17 +156,16 @@ export default {
           {educationkey:2,educationvalue:'研究生'},
           {educationkey:4,educationvalue:'博士'}
         ],
-        // 学生状态字典
-        stateOptions: [
-        ],
       };
     },
     methods: {
       handleOpen: function() {
         this.dialogVisible = true;
-        // getStu(10).then(response => {
-        // this.stu=response;
-        // });
+        getStu(this.stuId).then(response => {
+          this.stu=response.data;
+          console.log(response.data);
+          // this.stu=response;
+        });
       },
       handleClose(done) {
         this.dialogVisible = false;

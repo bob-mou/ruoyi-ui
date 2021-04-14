@@ -171,7 +171,7 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <div class="text-center">
-            <detail :stu="scope.row" />
+            <detail :stuId="scope.row.stuId" />
           </div>
           <el-button
             size="mini"
@@ -181,8 +181,8 @@
             v-hasPermi="['service:stu:edit']"
           >修改</el-button>
           <el-button
-            type="text"
             size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['service:stu:remove']"
@@ -190,6 +190,7 @@
         </template>
       </el-table-column>
     </el-table>
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -197,6 +198,7 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
     <!-- 添加或修改学生管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body @close="closedialog">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -602,6 +604,7 @@ export default {
       this.reset();
       const stuId = row.stuId || this.ids
       getStu(stuId).then(response => {
+        // console.log(response.data)
         this.form = response.data;
         this.open = true;
         this.title = "修改学生管理";
