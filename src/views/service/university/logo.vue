@@ -122,6 +122,7 @@
         this.$refs.cropper.getCropBlob(data => {
           let formData = new FormData();
           formData.append("avatarfile", data);
+          console.log(formData)
           uploadAvatar(formData).then(response => {
             this.open = false;
             this.$emit("myLogoPath",process.env.VUE_APP_BASE_API + response.imgUrl);

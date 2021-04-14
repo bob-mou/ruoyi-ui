@@ -15,7 +15,6 @@ export function getCollage(collegeId) {
     method: 'get'
   })
 }
-
 // 新增学院管理
 export function addCollage(data) {
   return request({

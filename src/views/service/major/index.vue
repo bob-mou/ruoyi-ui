@@ -10,25 +10,36 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="外键学院ID" prop="collegeId">
-        <el-input
-          v-model="queryParams.collegeId"
-          placeholder="请输入外键学院ID"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="专业状态" prop="state">
-        <el-select v-model="queryParams.state" placeholder="请选择专业状态" clearable size="small">
+      <el-form-item label="所属学校" prop="universityId">
+        <el-select v-model="queryParams.universityId" placeholder="请选择所属学校" clearable size="small" @change="getUniversityValue">
           <el-option
-            v-for="dict in stateOptions"
-            :key="dict.dictValue"
-            :label="dict.dictLabel"
-            :value="dict.dictValue"
-          />
+            v-for="item in universityoptions"
+            :key="item.universityId"
+            :label="item.universityName"
+            :value="item.universityId">
+          </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="所属学院" prop="collegeId">
+        <el-select v-model="queryParams.collegeId" placeholder="请选择所属学院" clearable size="small" >
+          <el-option
+            v-for="item in collegeoptions"
+            :key="item.collegeId"
+            :label="item.collegeName"
+            :value="item.collegeId">
+          </el-option>
+        </el-select>
+      </el-form-item>
+<!--      <el-form-item label="专业状态" prop="state">-->
+<!--        <el-select v-model="queryParams.state" placeholder="请选择专业状态" clearable size="small">-->
+<!--          <el-option-->
+<!--            v-for="dict in stateOptions"-->
+<!--            :key="dict.dictValue"-->
+<!--            :label="dict.dictLabel"-->
+<!--            :value="dict.dictValue"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -85,7 +96,8 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="编号" align="center" type="index" />
       <el-table-column label="专业名称" align="center" prop="majorName" />
-      <el-table-column label="外键学院ID" align="center" prop="collegeId" />
+      <el-table-column label="所属学校" align="center" prop="universityName" />
+      <el-table-column label="所属学院" align="center" prop="collegeName" />
       <el-table-column label="备注" align="center" prop="remarks" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -121,8 +133,25 @@
         <el-form-item label="专业名称" prop="majorName">
           <el-input v-model="form.majorName" placeholder="请输入专业名称" />
         </el-form-item>
-        <el-form-item label="外键学院ID" prop="collegeId">
-          <el-input v-model="form.collegeId" placeholder="请输入外键学院ID" />
+        <el-form-item label="所属学校" prop="universityId">
+          <el-select v-model="form.universityId" placeholder="请选择学校" clearable size="small" @change="getUniversityValue">
+            <el-option
+              v-for="item in universityoptions"
+              :key="item.universityId"
+              :label="item.universityName"
+              :value="item.universityId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属学院" prop="collegeId">
+          <el-select v-model="form.collegeId" placeholder="请选择学院" clearable size="small" >
+            <el-option
+              v-for="item in collegeoptions"
+              :key="item.collegeId"
+              :label="item.collegeName"
+              :value="item.collegeId">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="创建时间" prop="createDate">
           <el-date-picker clearable size="small"
@@ -161,11 +190,28 @@
               <el-input v-model="scope.row.className" placeholder="请输入班级名称" />
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createDate">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.createDate" placeholder="请输入创建时间" />
-            </template>
-          </el-table-column>
+<!--          <el-table-column label="创建时间" prop="createDate">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-date-picker-->
+<!--                  v-model="scope.row.createDate"-->
+<!--                  type="date"-->
+<!--                  value-format="yyyy-MM-dd"-->
+<!--                  placeholder="选择创建时间">-->
+<!--              </el-date-picker>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--          <el-table-column label="所属专业" prop="className">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-select v-model="scope.row.majorId" placeholder="请选择所属专业" clearable size="small" >-->
+<!--                <el-option-->
+<!--                  v-for="item in majoroptions"-->
+<!--                  :key="item.majorId"-->
+<!--                  :label="item.majorName"-->
+<!--                  :value="item.majorId">-->
+<!--                </el-option>-->
+<!--              </el-select>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
           <el-table-column label="班级状态" prop="state">
             <template slot-scope="scope">
               <el-input v-model="scope.row.state" placeholder="请输入班级状态" />
@@ -188,7 +234,7 @@
 
 <script>
 import { listMajor, getMajor, delMajor, addMajor, updateMajor, exportMajor } from "@/api/service/major";
-
+import {allListUniversity,allListCollege, allListMajor} from "@/api/service/stu";
 export default {
   name: "Major",
   components: {
@@ -213,6 +259,12 @@ export default {
       majorList: [],
       // 班级管理表格数据
       myClassList: [],
+      //学校列表
+      universityoptions: [],
+      //学院列表
+      collegeoptions: [],
+      //专业列表
+      majoroptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -224,6 +276,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         majorName: null,
+        universityId: null,
         collegeId: null,
         state: null,
       },
@@ -234,8 +287,11 @@ export default {
         majorName: [
           { required: true, message: "专业名称不能为空", trigger: "blur" }
         ],
+        universityId: [
+          { required: true, message: "学校不能为空", trigger: "blur" }
+        ],
         collegeId: [
-          { required: true, message: "外键学院ID不能为空", trigger: "blur" }
+          { required: true, message: "学院不能为空", trigger: "blur" }
         ],
         createDate: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
@@ -251,6 +307,7 @@ export default {
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
+    this.getAllUniversity();
   },
   methods: {
     /** 查询专业管理列表 */
@@ -262,6 +319,44 @@ export default {
         this.loading = false;
       });
     },
+    //获取所有学校列表
+    getAllUniversity(){
+      allListUniversity().then(res =>{
+        this.universityoptions=res
+      })
+    },
+    // //获取所有学院列表（不区分学校）
+    // getCollegeList(){
+    //   allCollegeWithoutUniversity().then(res =>{
+    //     console.log(res);
+    //     this.collegeoptions=res;
+    //   })
+    // },
+    //学校列表选中值事件 (根据当前所选学校获取学校下的所有学院)
+    getUniversityValue(){
+      //先清空学院下拉框选项
+      this.collegeoptions=[];
+      //清空学院下拉框已经选中值，防止学校修改了，学院下拉框的选中值还没修改
+      this.queryParams.collegeId=null;
+      this.form.collegeId=null;
+      //学校下拉框有选中值时(搜索时是this.queryParams.universityId有值，新增时，是this.form.universityId有值)
+      if(this.queryParams.universityId||this.form.universityId){
+        let param={}
+        if(this.queryParams.universityId){
+          param={universityId:this.queryParams.universityId }
+        }else{
+          param={universityId:this.form.universityId }
+        }
+        //获取学校下的所有学院
+        allListCollege(param).then( res =>{
+          this.collegeoptions=res;
+        })
+      }
+    },
+    //学院下拉框选中值改变
+    // getCollegeValue(){
+    //   //this.majoroptions=null;
+    // },
     // 专业状态字典翻译
     stateFormat(row, column) {
       return this.selectDictLabel(this.stateOptions, row.state);
@@ -308,6 +403,7 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      console.log(row)
       this.reset();
       const majorId = row.majorId || this.ids
       getMajor(majorId).then(response => {
@@ -315,12 +411,21 @@ export default {
         this.myClassList = response.data.myClassList;
         this.open = true;
         this.title = "修改专业管理";
+        //获取学院列表
+        allListCollege({universityId: row.universityId}).then( res =>{
+          this.collegeoptions=res;
+        })
+        //获取专业列表
+        allListMajor({collegeId: row.collegeId}).then( res =>{
+          this.majoroptions =res;
+        })
       });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.collegeoptions=null;
           this.form.myClassList = this.myClassList;
           if (this.form.majorId != null) {
             updateMajor(this.form).then(response => {
@@ -350,7 +455,9 @@ export default {
         }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
+        }).catch(()=>{
+
+      })
     },
 	/** 班级管理序号 */
     rowmyClassIndex({ row, rowIndex }) {
@@ -370,7 +477,19 @@ export default {
       if (this.checkedmyClass.length == 0) {
         this.$alert("请先选择要删除的班级管理数据", "提示", { confirmButtonText: "确定", });
       } else {
-        this.myClassList.splice(this.checkedmyClass[0].index - 1, 1);
+        this.$confirm('此操作将永久删除当前专业下的班级以及班级下的所有数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.myClassList.splice(this.checkedmyClass[0].index - 1, 1);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
       }
     },
     /** 单选框选中数据 */
