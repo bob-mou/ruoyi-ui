@@ -1,19 +1,40 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="所属学校" prop="universityId">
+        <el-select v-model="queryParams.universityId" placeholder="请选择所属学校" clearable size="small" @change="getUniversityValue">
+          <el-option
+            v-for="item in universityoptions"
+            :key="item.universityId"
+            :label="item.universityName"
+            :value="item.universityId">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所属学院" prop="collegeId">
+        <el-select v-model="queryParams.collegeId" placeholder="请选择所属学院" clearable size="small" @change="getCollegeValue">
+          <el-option
+            v-for="item in collegeoptions"
+            :key="item.collegeId"
+            :label="item.collegeName"
+            :value="item.collegeId">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所属专业" prop="majorId">
+        <el-select v-model="queryParams.majorId" placeholder="请选择所属专业" clearable size="small" @change="getMajorValue">
+          <el-option
+            v-for="item in majoroptions"
+            :key="item.majorId"
+            :label="item.majorName"
+            :value="item.majorId">
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="班级名称" prop="className">
         <el-input
           v-model="queryParams.className"
           placeholder="请输入班级名称"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="外键专业ID" prop="majorId">
-        <el-input
-          v-model="queryParams.majorId"
-          placeholder="请输入外键专业ID"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -74,8 +95,10 @@
     <el-table v-loading="loading" :data="myclassList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="编号" align="center" type="index" />
-      <el-table-column label="班级名称" align="center" prop="className" />
-      <el-table-column label="外键专业ID" align="center" prop="majorId" />
+      <el-table-column label="名称" align="center" prop="className" />
+      <el-table-column label="所属专业" align="center" prop="majorName" />
+      <el-table-column label="所属学院" align="center"  prop="collegeName" />
+      <el-table-column label="所属学校" align="center" prop="universityName" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createDate, '{y}-{m}-{d}') }}</span>
@@ -116,8 +139,35 @@
         <el-form-item label="班级名称" prop="className">
           <el-input v-model="form.className" placeholder="请输入班级名称" />
         </el-form-item>
-        <el-form-item label="外键专业ID" prop="majorId">
-          <el-input v-model="form.majorId" placeholder="请输入外键专业ID" />
+        <el-form-item label="所属学校" prop="universityId">
+          <el-select v-model="form.universityId" placeholder="请选择所属学校" clearable size="small" @change="getUniversityValue">
+            <el-option
+              v-for="item in universityoptions"
+              :key="item.universityId"
+              :label="item.universityName"
+              :value="item.universityId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属学院" prop="collegeId">
+          <el-select v-model="form.collegeId" placeholder="请选择所属学院" clearable size="small" @change="getCollegeValue">
+            <el-option
+              v-for="item in collegeoptions"
+              :key="item.collegeId"
+              :label="item.collegeName"
+              :value="item.collegeId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属专业" prop="majorId">
+          <el-select v-model="form.majorId" placeholder="请选择所属专业" clearable size="small" @change="getMajorValue">
+            <el-option
+              v-for="item in majoroptions"
+              :key="item.majorId"
+              :label="item.majorName"
+              :value="item.majorId">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="班级状态">
           <el-radio-group v-model="form.state">
@@ -142,7 +192,9 @@
 
 <script>
 import { listMyclass, getMyclass, delMyclass, addMyclass, updateMyclass, exportMyclass } from "@/api/service/myclass";
-
+import { allListUniversity,allListCollege ,allListMajor} from "@/api/service/stu";
+import { listCollage } from "@/api/service/collage";
+import { listMajor } from "@/api/service/major";
 export default {
   name: "Myclass",
   components: {
@@ -161,6 +213,12 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
+      //学校列表
+      universityoptions: [],
+      //学院列表
+      collegeoptions: [],
+      //专业列表
+      majoroptions: [],
       // 班级管理表格数据
       myclassList: [],
       // 弹出层标题
@@ -176,6 +234,8 @@ export default {
         className: null,
         majorId: null,
         state: null,
+        universityId: null,
+        collegeId: null,
       },
       // 表单参数
       form: {},
@@ -185,10 +245,13 @@ export default {
           { required: true, message: "班级名称不能为空", trigger: "blur" }
         ],
         majorId: [
-          { required: true, message: "外键专业ID不能为空", trigger: "blur" }
+          { required: true, message: "所属专业不能为空", trigger: "blur" }
         ],
-        createDate: [
-          { required: true, message: "创建时间不能为空", trigger: "blur" }
+        universityId: [
+          { required: true, message: "所属学校不能为空", trigger: "blur" }
+        ],
+        collegeId: [
+          { required: true, message: "所属学院不能为空", trigger: "blur" }
         ],
         state: [
           { required: true, message: "班级状态不能为空", trigger: "blur" }
@@ -201,16 +264,98 @@ export default {
     this.getDicts("sys_normal_disable").then(response => {
       this.stateOptions = response.data;
     });
+    this.getAllUniversity();
+    this.getCollege();
+    this.getMajor();
   },
   methods: {
     /** 查询班级管理列表 */
     getList() {
       this.loading = true;
+      console.log(this.queryParams);
       listMyclass(this.queryParams).then(response => {
         this.myclassList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
+    },
+    //查询学校列表
+    getAllUniversity(){
+      allListUniversity().then( response =>{
+        this.universityoptions=response;
+      })
+    },
+    //查询学院列表
+    getCollege(){
+      this.loading = true;
+      listCollage(this.queryParams).then(response => {
+        this.collegeoptions = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    //查询专业列表
+    getMajor(){
+      this.loading = true;
+      listMajor(this.queryParams).then(response => {
+        this.majoroptions = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    //学校下拉框选中学校
+    getUniversityValue(){
+      this.collegeoptions=[];
+      this.majoroptions=[];
+      this.queryParams.collegeId=null;
+      this.queryParams.majorId=null;
+      this.queryParams.classId=null;
+      this.form.collegeId=null;
+      this.form.majorId=null;
+      this.form.classId=null;
+      if(this.queryParams.universityId||this.form.universityId){
+        let param={};
+        if(this.queryParams.universityId){
+          param={universityId: this.queryParams.universityId}
+        }else{
+          param={universityId: this.form.universityId}
+        }
+        allListCollege(param).then(response =>{
+          this.collegeoptions=response;
+        })
+      }
+    },
+    //学院下拉框选中值
+    getCollegeValue(){
+      this.majoroptions=[];
+      this.queryParams.majorId=null;
+      this.queryParams.classId=null;
+      this.form.majorId=null;
+      this.form.classId=null;
+      if(this.queryParams.collegeId||this.form.collegeId){
+        let param={};
+        if(this.queryParams.collegeId){
+          param={collegeId: this.queryParams.collegeId}
+        }else{
+          param={collegeId: this.form.collegeId}
+        }
+        allListMajor(param).then(response =>{
+          this.majoroptions=response;
+        })
+      }
+    },
+    //专业下拉框选中值
+    getMajorValue(){
+      this.queryParams.classId=null;
+      this.form.classId=null;
+      if(this.queryParams.majorId||this.form.majorId){
+        let param={};
+        if(this.queryParams.majorId){
+          param={majorId: this.queryParams.majorId}
+        }else{
+          param={majorId: this.form.majorId}
+        }
+      }
     },
     // 班级状态字典翻译
     stateFormat(row, column) {
