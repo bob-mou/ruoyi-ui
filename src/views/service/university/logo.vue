@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
+    <div class="user-info-head" @click="editCropper()"><img v-bind:src="this.logoPath" title="点击上传头像" class="img-circle img-lg" /></div>
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body @opened="modalOpened">
       <el-row>
         <el-col :xs="24" :md="12" :style="{height: '350px'}">
@@ -71,7 +71,7 @@
         // 弹出层标题
         title: "学校logo",
         options: {
-          img: store.getters.avatar, //裁剪图片的地址
+          img: null, //裁剪图片的地址
           autoCrop: true, // 是否默认生成截图框
           autoCropWidth: 200, // 默认生成截图框宽度
           autoCropHeight: 200, // 默认生成截图框高度
@@ -84,6 +84,8 @@
       // 编辑头像
       editCropper() {
         this.open = true;
+        console.log("打印的这个");
+        this.options.img=this.logoPath;
       },
       // 打开弹出层结束时的回调
       modalOpened() {
