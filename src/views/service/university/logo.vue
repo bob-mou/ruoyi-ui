@@ -55,14 +55,12 @@
 <script>
   import store from "@/store";
   import { VueCropper } from "vue-cropper";
-  import { uploadAvatar } from "@/api/system/user";
+  import { uploadAvatar } from "@/api/service/university";
 
   export default {
     components: { VueCropper },
     props: {
-      user: {
-        type: Object
-      }
+      logoPath:'',
     },
     data() {
       return {
@@ -71,7 +69,7 @@
         // 是否显示cropper
         visible: false,
         // 弹出层标题
-        title: "修改头像",
+        title: "学校logo",
         options: {
           img: store.getters.avatar, //裁剪图片的地址
           autoCrop: true, // 是否默认生成截图框
@@ -126,9 +124,8 @@
           formData.append("avatarfile", data);
           uploadAvatar(formData).then(response => {
             this.open = false;
-            this.options.img = process.env.VUE_APP_BASE_API + response.imgUrl;
-            store.commit('SET_AVATAR', this.options.img);
-            this.msgSuccess("修改成功");
+            this.$emit("myLogoPath",process.env.VUE_APP_BASE_API + response.imgUrl);
+            this.msgSuccess("图片已提交");
             this.visible = false;
           });
         });

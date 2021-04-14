@@ -102,7 +102,6 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
     <!-- 添加或修改学校管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -110,7 +109,7 @@
           <el-input v-model="form.universityName" placeholder="请输入学校名" />
         </el-form-item>
         <el-form-item label="学校logo" prop="logoPath">
-          <el-input v-model="form.logoPath" placeholder="请输入学校logo" />
+          <logo :logoPath="form.logoPath" @myLogoPath="beforeSubmit" />
         </el-form-item>
         <el-form-item label="学校地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入学校地址" />
@@ -172,10 +171,10 @@
 
 <script>
 import { listUniversity, getUniversity, delUniversity, addUniversity, updateUniversity, exportUniversity } from "@/api/service/university";
-
+import logo from "@/views/service/university/logo";
 export default {
   name: "University",
-  components: {
+  components: { logo
   },
   data() {
     return {
@@ -300,6 +299,10 @@ export default {
         this.open = true;
         this.title = "修改学校管理";
       });
+    },
+    //接受传递过来的值
+    beforeSubmit(myLogoPath){
+      this.form.logoPath=myLogoPath;
     },
     /** 提交按钮 */
     submitForm() {
