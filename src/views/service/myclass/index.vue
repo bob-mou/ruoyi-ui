@@ -324,14 +324,18 @@ export default {
           this.collegeoptions=response;
         })
       }
+      else{
+        allListCollege().then(response =>{
+          this.collegeoptions=response;
+          console.log(this.collegeoptions);
+        })
+      }
     },
     //学院下拉框选中值
     getCollegeValue(){
       this.majoroptions=[];
       this.queryParams.majorId=null;
-      this.queryParams.classId=null;
       this.form.majorId=null;
-      this.form.classId=null;
       if(this.queryParams.collegeId||this.form.collegeId){
         let param={};
         if(this.queryParams.collegeId){
@@ -341,6 +345,11 @@ export default {
         }
         allListMajor(param).then(response =>{
           this.majoroptions=response;
+        })
+      }
+      else {
+        allListMajor().then(response => {
+          this.majoroptions = response;
         })
       }
     },
