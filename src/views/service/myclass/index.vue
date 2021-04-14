@@ -324,12 +324,6 @@ export default {
           this.collegeoptions=response;
         })
       }
-      else{
-        allListCollege().then(response =>{
-          this.collegeoptions=response;
-          console.log(this.collegeoptions);
-        })
-      }
     },
     //学院下拉框选中值
     getCollegeValue(){
@@ -345,11 +339,6 @@ export default {
         }
         allListMajor(param).then(response =>{
           this.majoroptions=response;
-        })
-      }
-      else {
-        allListMajor().then(response => {
-          this.majoroptions = response;
         })
       }
     },

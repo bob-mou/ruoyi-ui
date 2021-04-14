@@ -8,7 +8,6 @@ export function listCollage(query) {
     params: query
   })
 }
-
 // 查询学院管理详细
 export function getCollage(collegeId) {
   return request({
